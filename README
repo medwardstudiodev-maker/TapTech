@@ -1,0 +1,22 @@
+# TapTech Business Cards
+
+Digital business card system built on Google Apps Script + Google Sheets.
+
+## Files
+- Code.gs — server logic (routes, sheet reads/writes, photo upload)
+- Card.html — the public-facing card page
+- Admin.html — the private admin panel (locked to one Google account)
+
+## Key IDs (do not lose these)
+- Sheet: "Business Cards Database" — 1pqExON858uEvvfpLqHUaxPet0tRMlQMd3bGzkCvVrlY
+- Photos folder: "BC pictures" — 14qY5AnT476JjrCdJ8h2GB4yZTSAW7ln-
+- Admin email: medward.studiodev@gmail.com
+
+## To deploy
+1. Go to script.google.com, open the project
+2. Paste Code.gs, Card.html, Admin.html in
+3. Deploy → Manage deployments → New version → Deploy
+
+## Links
+- Admin: .../exec?page=admin
+- A card: .../exec?id=<cardid>
