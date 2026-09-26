@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<?
+  var THEMES = {
+    classic:     { p:'#ff8fab', ps:'#ffe3ea', r:'#ff5c7a', rd:'#e63e62', bg1:'#fff0f4', bg2:'#ffd6e0', bg3:'#ffc2cf', text:'#4a2230', muted:'#9b6b7a', romantic:true },
+    artist_m:    { p:'#ffb648', ps:'#fff3e0', r:'#ff9800', rd:'#e65100', bg1:'#fff8f0', bg2:'#ffe9c7', bg3:'#ffdca3', text:'#3a2b12', muted:'#a9855a', romantic:false },
+    artist_f:    { p:'#c792ea', ps:'#f3e8ff', r:'#ff8fa3', rd:'#d6336c', bg1:'#fdf4ff', bg2:'#f3e1ff', bg3:'#ffd9e6', text:'#3a1f3d', muted:'#9c7ea8', romantic:false },
+    business_m:  { p:'#d4af37', ps:'#f5eeda', r:'#2b5583', rd:'#0f2338', bg1:'#f4f6f9', bg2:'#dbe4ee', bg3:'#c7d3e0', text:'#12202e', muted:'#5b7185', romantic:false },
+    business_f:  { p:'#e0b0a0', ps:'#fbeee9', r:'#b76e79', rd:'#6a2c3b', bg1:'#fff5f2', bg2:'#f3ddd6', bg3:'#e9c9c0', text:'#3a1c22', muted:'#a97e82', romantic:false },
+    engineer_m:  { p:'#4fd1e3', ps:'#e3fbfd', r:'#2b6777', rd:'#12303a', bg1:'#f2fbfc', bg2:'#d9f1f4', bg3:'#c3e6ea', text:'#0e1f24', muted:'#5c8a94', romantic:false },
+    engineer_f:  { p:'#7fd8c6', ps:'#e6faf6', r:'#3f7268', rd:'#1d3d36', bg1:'#f3fbf9', bg2:'#dbf1ec', bg3:'#c7e6de', text:'#12241f', muted:'#5f8b80', romantic:false },
+    musician_m:  { p:'#b18cff', ps:'#efe6ff', r:'#6c3bd1', rd:'#2e1065', bg1:'#f6f3ff', bg2:'#e5d9ff', bg3:'#d3bfff', text:'#1c1033', muted:'#8a76b0', romantic:false },
+    musician_f:  { p:'#ff6fb5', ps:'#ffe3f2', r:'#c23bce', rd:'#6a1b8a', bg1:'#fff2fb', bg2:'#ffd9f0', bg3:'#f0bdf5', text:'#331030', muted:'#a86ba0', romantic:false },
+    photo_m:     { p:'#e0a95e', ps:'#fbf1e0', r:'#8a6d3b', rd:'#2b2118', bg1:'#faf7f2', bg2:'#eee0c8', bg3:'#ddc9a1', text:'#1c160d', muted:'#8a7a5e', romantic:false },
+    photo_f:     { p:'#e8b4a0', ps:'#fdf1ec', r:'#a97c68', rd:'#4a332b', bg1:'#fdf8f5', bg2:'#f2ddd2', bg3:'#e6c7b8', text:'#2c1e18', muted:'#9c7c6e', romantic:false }
+  };
+  var theme = THEMES[card && card.theme] || THEMES.classic;
+?>
+<style>
+  :root { --pink:<?= theme.p ?>; --pink-soft:<?= theme.ps ?>; --red:<?= theme.r ?>; --red-deep:<?= theme.rd ?>; --text:<?= theme.text ?>; --muted:<?= theme.muted ?>; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Poppins',sans-serif; background:linear-gradient(160deg,<?= theme.bg1 ?>,<?= theme.bg2 ?>,<?= theme.bg3 ?>); background-size:300% 300%;
+    animation:bgShift 12s ease infinite; color:var(--text); min-height:100vh; display:flex; justify-content:center; align-items:flex-start; padding:24px 16px; }
+  @keyframes bgShift { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+  .card { width:100%; max-width:420px; background:#fff; border-radius:24px; overflow:hidden; box-shadow:0 18px 40px rgba(0,0,0,.12);
+    animation:rise .8s ease-out both; position:relative; z-index:1; }
+  @keyframes rise { from{opacity:0; transform:translateY(30px)} to{opacity:1; transform:none} }
+  .cover { height:170px; background:linear-gradient(135deg,var(--pink),var(--red)) center/cover no-repeat; position:relative; }
+  .cover::after { content:''; position:absolute; inset:0; background:linear-gradient(to bottom,transparent 50%,rgba(0,0,0,.18)); }
+  .avatar-wrap { display:flex; justify-content:center; margin-top:-62px; position:relative; z-index:1; }
+  .avatar { width:124px; height:124px; border-radius:50%; border:5px solid #fff; object-fit:cover; object-position:center 30%;
+    background:var(--pink-soft); animation:pulse 2.8s infinite; }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(0,0,0,.15)} 70%{box-shadow:0 0 0 14px rgba(0,0,0,0)} 100%{box-shadow:0 0 0 0 rgba(0,0,0,0)} }
+  .body { padding:14px 22px 26px; text-align:center; }
+  h1 { font-size:1.6rem; font-weight:700; color:var(--red-deep); animation:fadeIn 1s .3s both; }
+  .roles { display:flex; flex-wrap:wrap; justify-content:center; gap:6px; margin:10px 0 4px; animation:fadeIn 1s .4s both; }
+  .roles span { background:var(--pink-soft); color:var(--red-deep); font-size:.7rem; font-weight:600;
+    padding:4px 10px; border-radius:999px; letter-spacing:.02em; }
+  .icon-row { display:flex; justify-content:center; flex-wrap:wrap; gap:12px; margin:12px 0 4px; animation:fadeIn 1s .45s both; }
+  .icon-row a { width:44px; height:44px; border-radius:50%; display:grid; place-items:center;
+    background:var(--pink-soft); color:var(--red); text-decoration:none; transition:transform .2s,background .2s,color .2s,box-shadow .2s; }
+  .icon-row a:hover { transform:translateY(-3px) scale(1.05); background:linear-gradient(135deg,var(--pink),var(--red)); color:#fff; box-shadow:0 8px 16px rgba(0,0,0,.2); }
+  .icon-row svg { width:22px; height:22px; fill:currentColor; }
+  .sub { color:var(--muted); font-size:.9rem; margin:8px 0 20px; animation:fadeIn 1s .5s both; }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  .section-title { font-size:.75rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:18px 0 10px; text-align:left; }
+  .links { display:grid; gap:10px; }
+  .link { display:flex; align-items:center; gap:12px; padding:13px 16px; border-radius:14px; background:var(--pink-soft); color:var(--text);
+    text-decoration:none; font-weight:500; text-align:left; transition:transform .2s,background .2s,color .2s,box-shadow .2s;
+    opacity:0; animation:slideIn .5s ease-out forwards; }
+  .link:hover { transform:translateY(-3px); background:linear-gradient(135deg,var(--pink),var(--red)); color:#fff; box-shadow:0 8px 18px rgba(0,0,0,.18); }
+  .link:hover .icon { background:rgba(255,255,255,.25); color:#fff; }
+  .link small { display:block; font-weight:400; font-size:.8rem; opacity:.8; }
+  .icon { width:38px; height:38px; border-radius:50%; flex-shrink:0; display:grid; place-items:center; background:#fff; color:var(--red); transition:background .2s,color .2s; }
+  .icon svg { width:20px; height:20px; fill:currentColor; }
+  @keyframes slideIn { from{opacity:0; transform:translateX(-16px)} to{opacity:1; transform:none} }
+  .hearts { position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:0; }
+  .hearts span { position:absolute; bottom:-30px; color:var(--pink); opacity:.5; animation:float linear infinite; }
+  @keyframes float { to { transform:translateY(-110vh) rotate(25deg); opacity:0; } }
+  .foot { margin-top:22px; font-size:.75rem; color:var(--muted); }
+  .eq { position:fixed; top:50%; right:14px; transform:translateY(-50%); display:flex; align-items:flex-end;
+    gap:4px; height:34px; z-index:2; opacity:.85; }
+  .eq span { width:5px; border-radius:3px; background:linear-gradient(180deg,var(--pink),var(--red-deep));
+    animation:eqBounce 1s ease-in-out infinite; transform-origin:bottom; }
+  .eq span:nth-child(1){ height:40%; animation-delay:0s; }
+  .eq span:nth-child(2){ height:100%; animation-delay:.15s; }
+  .eq span:nth-child(3){ height:60%; animation-delay:.3s; }
+  .eq span:nth-child(4){ height:85%; animation-delay:.45s; }
+  .eq span:nth-child(5){ height:50%; animation-delay:.6s; }
+  @keyframes eqBounce { 0%,100%{ transform:scaleY(.35); } 50%{ transform:scaleY(1); } }
+  @media (max-width:480px) { .eq { right:6px; height:26px; } .eq span { width:4px; } }
+  .empty { min-height:100vh; display:flex; align-items:center; justify-content:center; text-align:center; padding:24px; }
+  .empty h2 { color:var(--red-deep); margin-bottom:8px; }
+  .empty p { color:var(--muted); }
+</style>
+</head>
+<body>
+<? if (!card || card.active === false || card.active === 'FALSE' || card.active === 'false') { ?>
+  <div class="empty">
+    <div>
+      <h2>This card isn't available right now</h2>
+      <p>Please check back later.</p>
+    </div>
+  </div>
+<? } else {
+     var roleList = String(card.roles || '').split(',').map(function(r){ return r.trim(); }).filter(String);
+     var isOn = function(v){ return v === true || v === 'TRUE' || v === 'true' || v === 1 || v === '1'; };
+     var showPhone = isOn(card.showPhone) && card.phone;
+     var showViber = isOn(card.showViber) && card.viber;
+     var showTelegram = isOn(card.showTelegram) && card.telegram;
+     var showFacebook = isOn(card.showFacebook) && card.facebook;
+     var showInstagram = isOn(card.showInstagram) && card.instagram;
+     var showEmail = isOn(card.showEmail) && card.email;
+     var digits = String(card.phone || '').replace(/[^0-9]/g, '');
+     var intlPhone = digits.replace(/^0/, '63');
+?>
+  <? if (theme.romantic) { ?><div class="hearts" id="hearts"></div><? } ?>
+  <div class="eq" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+
+  <div class="card">
+    <div class="cover" <? if (card.coverUrl) { ?>style="background-image:url('<?= card.coverUrl ?>')"<? } ?>></div>
+    <div class="avatar-wrap">
+      <? if (card.profileUrl) { ?>
+      <img class="avatar" src="<?= card.profileUrl ?>" alt="<?= card.name ?>">
+      <? } ?>
+    </div>
+    <div class="body">
+      <h1><?= card.name ?></h1>
+      <? if (roleList.length) { ?>
+      <div class="roles">
+        <? roleList.forEach(function(r) { ?><span><?= r ?></span><? }); ?>
+      </div>
+      <? } ?>
+
+      <div class="icon-row">
+        <? if (showFacebook) { ?>
+        <a href="<?= card.facebook ?>" target="_blank" aria-label="Facebook">
+          <svg viewBox="0 0 24 24"><path d="M14 8V6.5c0-.7.2-1.2 1.2-1.2H17V2.2A23 23 0 0 0 14.4 2C11.9 2 10 3.6 10 6.4V8H7.3v3.4H10V22h4V11.4h2.8L17.3 8z"/></svg>
+        </a>
+        <? } if (showInstagram) { ?>
+        <a href="<?= card.instagram ?>" target="_blank" aria-label="Instagram">
+          <svg viewBox="0 0 24 24"><path d="M12 7.3A4.7 4.7 0 1 0 16.7 12 4.7 4.7 0 0 0 12 7.3zm0 7.7a3 3 0 1 1 3-3 3 3 0 0 1-3 3zm6-7.9a1.1 1.1 0 1 1-1.1-1.1A1.1 1.1 0 0 1 18 7.1zM21.9 8.1a5.4 5.4 0 0 0-1.5-3.8 5.5 5.5 0 0 0-3.8-1.5C15 2.7 9 2.7 7.4 2.8a5.5 5.5 0 0 0-3.8 1.5A5.4 5.4 0 0 0 2 8.1c-.1 1.6-.1 6.3 0 7.8a5.4 5.4 0 0 0 1.5 3.8 5.5 5.5 0 0 0 3.8 1.5c1.6.1 7.6.1 9.2 0a5.4 5.4 0 0 0 3.8-1.5 5.5 5.5 0 0 0 1.5-3.8c.1-1.6.1-6.2 0-7.8zm-2 9.5a3.1 3.1 0 0 1-1.8 1.8c-1.2.5-4.1.4-5.4.4s-4.3.1-5.4-.4a3.1 3.1 0 0 1-1.8-1.8c-.5-1.2-.4-4.1-.4-5.4s-.1-4.3.4-5.4a3.1 3.1 0 0 1 1.8-1.8c1.2-.5 4.1-.4 5.4-.4s4.3-.1 5.4.4a3.1 3.1 0 0 1 1.8 1.8c.5 1.2.4 4.1.4 5.4s.1 4.3-.4 5.4z"/></svg>
+        </a>
+        <? } if (showPhone) { ?>
+        <a href="tel:<?= card.phone ?>" aria-label="Call">
+          <svg viewBox="0 0 24 24"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.6a1 1 0 0 1-.25 1z"/></svg>
+        </a>
+        <? } if (showViber) { ?>
+        <a href="viber://chat?number=%2B<?= intlPhone ?>" aria-label="Viber">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.5 2 3 4.6 3 10.3c0 3 .9 5.1 2.6 6.4V21l3.2-2.3c1 .2 2.1.3 3.2.3 5.5 0 9-2.6 9-8.7S17.5 2 12 2zm4.3 12.3c-.3.8-1.4 1.4-2.1 1.4-.6 0-1.3-.2-3.4-1.3a9.6 9.6 0 0 1-3.6-3.9c-.5-1-.6-1.9-.2-2.6.3-.6.9-1 1.3-.9.3 0 .5.2.7.6l.7 1.5c.1.3 0 .6-.2.8l-.5.6c.6 1.2 1.6 2.2 2.8 2.8l.6-.6c.2-.2.5-.3.8-.2l1.5.7c.4.2.6.5.6.8z"/></svg>
+        </a>
+        <? } if (showTelegram) { ?>
+        <a href="https://t.me/+<?= intlPhone ?>" aria-label="Telegram">
+          <svg viewBox="0 0 24 24"><path d="M21.5 3.6 2.9 10.8c-1.3.5-1.2 1.2-.2 1.5l4.8 1.5 1.8 5.6c.2.7.5.8 1 .3l2.7-2.5 5 3.7c.9.5 1.5.2 1.8-.8l3.2-15.2c.3-1.3-.5-1.9-1.5-1.3zM9.6 14l8.2-7.5-6.9 8.3-.3 3.1z"/></svg>
+        </a>
+        <? } if (showEmail) { ?>
+        <a href="mailto:<?= card.email ?>" aria-label="Email">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm0 2v.01L12 12l8-5.99V6H4zm16 12V8.24l-7.4 5.55a1 1 0 0 1-1.2 0L4 8.24V18h16z"/></svg>
+        </a>
+        <? } ?>
+      </div>
+
+      <p class="sub">Let's connect<? if (theme.romantic) { ?> 💕<? } ?></p>
+
+      <p class="foot">© <?= card.name ?></p>
+    </div>
+  </div>
+
+<? if (theme.romantic) { ?>
+<script>
+  var box = document.getElementById('hearts');
+  for (var i = 0; i < 14; i++) {
+    var s = document.createElement('span');
+    s.textContent = '♥';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.fontSize = (10 + Math.random() * 16) + 'px';
+    s.style.animationDuration = (9 + Math.random() * 10) + 's';
+    s.style.animationDelay = (-Math.random() * 15) + 's';
+    box.appendChild(s);
+  }
+</script>
+<? } ?>
+<? } ?>
+</body>
+</html>

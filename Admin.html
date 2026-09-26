@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --pink:#ff8fab; --pink-soft:#ffe3ea; --red:#ff5c7a; --red-deep:#e63e62; --text:#4a2230; --muted:#9b6b7a; --bg:#fff5f7; }
+  * { box-sizing:border-box; }
+  body { font-family:'Poppins',sans-serif; margin:0; background:var(--bg); color:var(--text); padding:16px; }
+  h1 { font-size:1.3rem; color:var(--red-deep); margin:4px 0 4px; }
+  .muted { color:var(--muted); font-size:.85rem; margin-bottom:16px; }
+  .denied { max-width:420px; margin:60px auto; text-align:center; }
+  .denied h2 { color:var(--red-deep); }
+  .toolbar { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+  button { font-family:inherit; border:none; border-radius:10px; padding:10px 16px; font-weight:600; cursor:pointer; font-size:.85rem; }
+  .btn-primary { background:linear-gradient(135deg,var(--pink),var(--red)); color:#fff; }
+  .btn-secondary { background:var(--pink-soft); color:var(--red-deep); }
+  .btn-danger { background:#ffe0e0; color:#c62828; }
+  .list { display:grid; gap:10px; margin-bottom:20px; }
+  .row { background:#fff; border-radius:14px; padding:10px 14px; display:flex; align-items:center; gap:12px;
+    box-shadow:0 4px 14px rgba(230,62,98,.08); cursor:pointer; }
+  .row.inactive { opacity:.55; }
+  .row .thumb { width:44px; height:44px; border-radius:50%; object-fit:cover; flex-shrink:0; background:var(--pink-soft); }
+  .row .thumb-fallback { width:44px; height:44px; border-radius:50%; flex-shrink:0; display:grid; place-items:center;
+    color:#fff; font-weight:700; font-size:1rem; }
+  .row .info { flex:1; min-width:0; }
+  .row .name-line { display:flex; align-items:center; gap:6px; }
+  .row .name { font-weight:600; }
+  .row .id { color:var(--muted); font-size:.8rem; }
+  .row .roles { color:var(--muted); font-size:.78rem; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .row .theme-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; border:1px solid rgba(0,0,0,.1); }
+  .row .chev { color:var(--muted); font-size:1.1rem; flex-shrink:0; }
+  .badge { font-size:.7rem; padding:3px 8px; border-radius:999px; font-weight:600; flex-shrink:0; }
+  .badge.on { background:#e3fbe8; color:#1a8a3d; }
+  .badge.off { background:#f1f1f1; color:#888; }
+  .search { width:100%; padding:10px 14px; border-radius:12px; border:1px solid #f0d3da; font-family:inherit; font-size:.9rem; margin-bottom:12px; background:#fff; }
+  .row-actions { display:flex; gap:6px; flex-shrink:0; }
+  .row-actions button, .row-actions a { border:none; background:var(--pink-soft); color:var(--red-deep); border-radius:8px;
+    width:30px; height:30px; display:grid; place-items:center; cursor:pointer; text-decoration:none; font-size:.9rem; padding:0; }
+  .row-actions button:active, .row-actions a:active { background:var(--pink); color:#fff; }
+  .copy-toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#333; color:#fff;
+    padding:8px 16px; border-radius:999px; font-size:.8rem; opacity:0; pointer-events:none; transition:opacity .2s; z-index:50; }
+  .copy-toast.show { opacity:1; }
+
+  .panel { background:#fff; border-radius:16px; padding:18px; box-shadow:0 6px 20px rgba(230,62,98,.1); }
+  .field { margin-bottom:12px; }
+  .field label { display:block; font-size:.75rem; font-weight:600; color:var(--muted); margin-bottom:4px; text-transform:uppercase; letter-spacing:.04em; }
+  .field input[type=text], .field input[type=url], .field select {
+    width:100%; padding:10px 12px; border-radius:10px; border:1px solid #f0d3da; font-family:inherit; font-size:.9rem; background:#fff; }
+  .toggle-row { display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid #fbe6ea; }
+  .toggle-row:last-child { border-bottom:none; }
+  .switch { position:relative; width:44px; height:24px; flex-shrink:0; }
+  .switch input { opacity:0; width:0; height:0; }
+  .slider { position:absolute; inset:0; background:#e6cdd3; border-radius:999px; transition:.2s; cursor:pointer; }
+  .slider::before { content:''; position:absolute; width:18px; height:18px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.2s; }
+  input:checked + .slider { background:linear-gradient(135deg,var(--pink),var(--red)); }
+  input:checked + .slider::before { transform:translateX(20px); }
+  .actions { display:flex; gap:8px; margin-top:16px; flex-wrap:wrap; }
+  .hint { font-size:.75rem; color:var(--muted); margin-top:4px; }
+  #status { font-size:.85rem; margin-top:10px; min-height:18px; }
+  #status.ok { color:#1a8a3d; }
+  #status.err { color:#c62828; }
+  .back { margin-bottom:12px; }
+  .swatch-row { display:flex; align-items:center; gap:10px; }
+  .swatch { width:22px; height:22px; border-radius:50%; flex-shrink:0; border:1px solid rgba(0,0,0,.08); }
+  .photo-field { display:flex; align-items:center; gap:12px; }
+  .photo-preview { width:56px; height:56px; border-radius:12px; object-fit:cover; background:var(--pink-soft); flex-shrink:0; display:none; }
+  .photo-preview.cover-preview { border-radius:8px; width:80px; height:52px; }
+  .photo-controls { flex:1; }
+  .upload-btn { display:inline-block; background:var(--pink-soft); color:var(--red-deep); border-radius:10px; padding:8px 14px;
+    font-size:.82rem; font-weight:600; cursor:pointer; }
+  .upload-btn input { display:none; }
+  .upload-status { font-size:.75rem; color:var(--muted); margin-top:4px; }
+  .upload-status.ok { color:#1a8a3d; }
+  .upload-status.err { color:#c62828; }
+
+  .preview-wrap { display:flex; justify-content:center; padding:20px 0 8px; background:#f6eef0; border-radius:16px; margin-bottom:16px; }
+  .preview-card { width:220px; background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 10px 24px rgba(0,0,0,.15); }
+  .preview-cover { height:70px; background:linear-gradient(135deg,var(--pv-pink,#ff8fab),var(--pv-red,#ff5c7a)); background-size:cover; background-position:center; }
+  .preview-avatar-wrap { display:flex; justify-content:center; margin-top:-28px; }
+  .preview-avatar { width:56px; height:56px; border-radius:50%; border:3px solid #fff; object-fit:cover; background:var(--pv-pink-soft,#ffe3ea); }
+  .preview-body { padding:6px 12px 16px; text-align:center; }
+  .preview-name { font-size:.85rem; font-weight:700; color:var(--pv-red-deep,#e63e62); margin-top:4px; }
+  .preview-roles { display:flex; flex-wrap:wrap; justify-content:center; gap:3px; margin-top:6px; }
+  .preview-roles span { background:var(--pv-pink-soft,#ffe3ea); color:var(--pv-red-deep,#e63e62); font-size:.55rem; font-weight:600; padding:2px 6px; border-radius:999px; }
+  .preview-icons { display:flex; justify-content:center; gap:6px; margin-top:8px; }
+  .preview-icons span { width:20px; height:20px; border-radius:50%; background:var(--pv-pink-soft,#ffe3ea); }
+  .preview-label { text-align:center; font-size:.7rem; color:var(--muted); margin-bottom:2px; }
+</style>
+</head>
+<body>
+
+<? if (!authorized) { ?>
+  <div class="denied">
+    <h2>🔒 Not authorized</h2>
+    <p class="muted">Signed in as: <?= email || '(not signed in)' ?></p>
+    <p>Only the account this admin page is set up for can access it.</p>
+  </div>
+<? } else { ?>
+  <h1>Business Cards Admin</h1>
+  <p class="muted">Signed in as <?= email ?></p>
+
+  <div id="listView">
+    <div class="toolbar">
+      <button class="btn-primary" onclick="newCard()">+ New Card</button>
+    </div>
+    <input type="text" class="search" id="searchBox" placeholder="Search by name or id…" oninput="renderList()">
+    <div class="list" id="cardList">Loading…</div>
+  </div>
+  <div class="copy-toast" id="copyToast">Link copied</div>
+
+  <div id="editView" style="display:none">
+    <div class="back"><button class="btn-secondary" onclick="showList()">← Back to list</button></div>
+    <div class="panel">
+      <div class="field">
+        <label>Card ID (used in the link, e.g. "riesan")</label>
+        <input type="text" id="f_id">
+        <div class="hint" id="idHint"></div>
+      </div>
+      <div class="field"><label>Name</label><input type="text" id="f_name" oninput="updatePreview()"></div>
+      <div class="field"><label>Roles (comma separated)</label><input type="text" id="f_roles" placeholder="Singer, Model, Host" oninput="updatePreview()"></div>
+
+      <div class="preview-label">Live preview</div>
+      <div class="preview-wrap">
+        <div class="preview-card" id="previewCard">
+          <div class="preview-cover" id="previewCover"></div>
+          <div class="preview-avatar-wrap"><img class="preview-avatar" id="previewAvatar"></div>
+          <div class="preview-body">
+            <div class="preview-name" id="previewName">Name</div>
+            <div class="preview-roles" id="previewRoles"></div>
+            <div class="preview-icons"><span></span><span></span><span></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Color theme</label>
+        <div class="swatch-row">
+          <span class="swatch" id="swatchPreview"></span>
+          <select id="f_theme" onchange="updateSwatch(); updatePreview()" style="flex:1"></select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Profile photo</label>
+        <div class="photo-field">
+          <img class="photo-preview" id="profilePreview">
+          <div class="photo-controls">
+            <label class="upload-btn">Upload photo<input type="file" accept="image/*" onchange="uploadPhoto(this,'profile')"></label>
+            <div class="upload-status" id="profileUploadStatus"></div>
+          </div>
+        </div>
+        <input type="url" id="f_profileUrl" placeholder="or paste a photo URL" style="margin-top:8px" oninput="syncPreview('profile'); updatePreview()">
+      </div>
+      <div class="field">
+        <label>Cover photo</label>
+        <div class="photo-field">
+          <img class="photo-preview cover-preview" id="coverPreview">
+          <div class="photo-controls">
+            <label class="upload-btn">Upload photo<input type="file" accept="image/*" onchange="uploadPhoto(this,'cover')"></label>
+            <div class="upload-status" id="coverUploadStatus"></div>
+          </div>
+        </div>
+        <input type="url" id="f_coverUrl" placeholder="or paste a photo URL" style="margin-top:8px" oninput="syncPreview('cover'); updatePreview()">
+      </div>
+
+      <div class="toggle-row">
+        <span>Card is active (visible to public)</span>
+        <label class="switch"><input type="checkbox" id="f_active"><span class="slider"></span></label>
+      </div>
+
+      <div class="field" style="margin-top:14px"><label>Phone number</label><input type="text" id="f_phone" placeholder="09xxxxxxxxx"></div>
+      <div class="toggle-row"><span>Show phone / call button</span>
+        <label class="switch"><input type="checkbox" id="f_showPhone"><span class="slider"></span></label></div>
+      <div class="toggle-row"><span>Show Viber (uses phone number above)</span>
+        <label class="switch"><input type="checkbox" id="f_showViber"><span class="slider"></span></label></div>
+      <div class="toggle-row"><span>Show Telegram (uses phone number above)</span>
+        <label class="switch"><input type="checkbox" id="f_showTelegram"><span class="slider"></span></label></div>
+
+      <div class="field" style="margin-top:14px"><label>Email address</label><input type="text" id="f_email" placeholder="name@example.com"></div>
+      <div class="toggle-row"><span>Show email</span>
+        <label class="switch"><input type="checkbox" id="f_showEmail"><span class="slider"></span></label></div>
+
+      <div class="field" style="margin-top:14px"><label>Facebook link</label><input type="url" id="f_facebook" placeholder="https://facebook.com/..."></div>
+      <div class="toggle-row"><span>Show Facebook</span>
+        <label class="switch"><input type="checkbox" id="f_showFacebook"><span class="slider"></span></label></div>
+
+      <div class="field" style="margin-top:14px"><label>Instagram link</label><input type="url" id="f_instagram" placeholder="https://instagram.com/..."></div>
+      <div class="toggle-row"><span>Show Instagram</span>
+        <label class="switch"><input type="checkbox" id="f_showInstagram"><span class="slider"></span></label></div>
+
+      <div class="actions">
+        <button class="btn-primary" onclick="saveCard()">Save</button>
+        <button class="btn-danger" onclick="removeCard()" id="deleteBtn">Delete</button>
+      </div>
+      <div id="status"></div>
+    </div>
+  </div>
+
+<script>
+  var THEMES = [
+    { key:'classic',    label:'Classic — Pink & Red',                 swatch:'#ff5c7a',
+      p:'#ff8fab', ps:'#ffe3ea', r:'#ff5c7a', rd:'#e63e62' },
+    { key:'artist_m',   label:'Graphic Artist — Amber & Slate (M)',   swatch:'#ff9800',
+      p:'#ffb648', ps:'#fff3e0', r:'#ff9800', rd:'#e65100' },
+    { key:'artist_f',   label:'Graphic Artist — Coral & Lilac (F)',   swatch:'#c792ea',
+      p:'#c792ea', ps:'#f3e8ff', r:'#ff8fa3', rd:'#d6336c' },
+    { key:'business_m', label:'Business — Navy & Gold (M)',          swatch:'#2b5583',
+      p:'#d4af37', ps:'#f5eeda', r:'#2b5583', rd:'#0f2338' },
+    { key:'business_f', label:'Business — Plum & Rose Gold (F)',     swatch:'#b76e79',
+      p:'#e0b0a0', ps:'#fbeee9', r:'#b76e79', rd:'#6a2c3b' },
+    { key:'engineer_m', label:'Engineer/Architect — Steel & Cyan (M)', swatch:'#2b6777',
+      p:'#4fd1e3', ps:'#e3fbfd', r:'#2b6777', rd:'#12303a' },
+    { key:'engineer_f', label:'Engineer/Architect — Slate & Teal (F)', swatch:'#3f7268',
+      p:'#7fd8c6', ps:'#e6faf6', r:'#3f7268', rd:'#1d3d36' },
+    { key:'musician_m', label:'Musician — Midnight & Neon Violet (M)', swatch:'#6c3bd1',
+      p:'#b18cff', ps:'#efe6ff', r:'#6c3bd1', rd:'#2e1065' },
+    { key:'musician_f', label:'Musician — Magenta & Violet (F)',      swatch:'#c23bce',
+      p:'#ff6fb5', ps:'#ffe3f2', r:'#c23bce', rd:'#6a1b8a' },
+    { key:'photo_m',    label:'Photographer — Charcoal & Amber (M)',  swatch:'#8a6d3b',
+      p:'#e0a95e', ps:'#fbf1e0', r:'#8a6d3b', rd:'#2b2118' },
+    { key:'photo_f',    label:'Photographer — Blush & Warm Grey (F)', swatch:'#a97c68',
+      p:'#e8b4a0', ps:'#fdf1ec', r:'#a97c68', rd:'#4a332b' }
+  ];
+
+  var cards = [];
+  var editingOriginalId = null;
+
+  function populateThemeSelect() {
+    var sel = document.getElementById('f_theme');
+    sel.innerHTML = '';
+    THEMES.forEach(function(t) {
+      var opt = document.createElement('option');
+      opt.value = t.key;
+      opt.textContent = t.label;
+      sel.appendChild(opt);
+    });
+  }
+
+  function updateSwatch() {
+    var key = document.getElementById('f_theme').value;
+    var t = THEMES.filter(function(x){ return x.key === key; })[0] || THEMES[0];
+    document.getElementById('swatchPreview').style.background = t.swatch;
+  }
+
+  function updatePreview() {
+    var key = document.getElementById('f_theme').value;
+    var t = THEMES.filter(function(x){ return x.key === key; })[0] || THEMES[0];
+    var card = document.getElementById('previewCard');
+    card.style.setProperty('--pv-pink', t.p);
+    card.style.setProperty('--pv-pink-soft', t.ps);
+    card.style.setProperty('--pv-red', t.r);
+    card.style.setProperty('--pv-red-deep', t.rd);
+
+    var coverUrl = document.getElementById('f_coverUrl').value.trim();
+    var coverEl = document.getElementById('previewCover');
+    coverEl.style.backgroundImage = coverUrl ? "url('" + coverUrl + "')" : '';
+
+    var profileUrl = document.getElementById('f_profileUrl').value.trim();
+    var avatarEl = document.getElementById('previewAvatar');
+    avatarEl.src = profileUrl || '';
+    avatarEl.style.visibility = profileUrl ? 'visible' : 'hidden';
+
+    document.getElementById('previewName').textContent = document.getElementById('f_name').value.trim() || 'Name';
+
+    var roles = document.getElementById('f_roles').value.split(',').map(function(r){ return r.trim(); }).filter(Boolean);
+    var rolesEl = document.getElementById('previewRoles');
+    rolesEl.innerHTML = '';
+    roles.slice(0, 4).forEach(function(r) {
+      var span = document.createElement('span');
+      span.textContent = r;
+      rolesEl.appendChild(span);
+    });
+  }
+
+  function syncPreview(kind) {
+    var url = document.getElementById(kind === 'profile' ? 'f_profileUrl' : 'f_coverUrl').value.trim();
+    var img = document.getElementById(kind + 'Preview');
+    if (url) {
+      img.src = url;
+      img.style.display = 'block';
+    } else {
+      img.style.display = 'none';
+    }
+  }
+
+  function uploadPhoto(input, kind) {
+    var file = input.files && input.files[0];
+    if (!file) return;
+    var statusEl = document.getElementById(kind + 'UploadStatus');
+    statusEl.textContent = 'Uploading…';
+    statusEl.className = 'upload-status';
+    var reader = new FileReader();
+    reader.onload = function() {
+      var dataUrl = reader.result;
+      var base64 = dataUrl.split(',')[1];
+      google.script.run
+        .withSuccessHandler(function(result) {
+          var urlField = document.getElementById(kind === 'profile' ? 'f_profileUrl' : 'f_coverUrl');
+          urlField.value = result.url;
+          syncPreview(kind);
+          updatePreview();
+          if (result.warning) {
+            statusEl.textContent = '⚠ ' + result.warning;
+            statusEl.className = 'upload-status err';
+          } else {
+            statusEl.textContent = 'Uploaded ✔';
+            statusEl.className = 'upload-status ok';
+          }
+        })
+        .withFailureHandler(function(e) {
+          statusEl.textContent = 'Upload failed: ' + (e && e.message ? e.message : e);
+          statusEl.className = 'upload-status err';
+        })
+        .adminUploadPhoto(base64, file.type, file.name);
+    };
+    reader.onerror = function() {
+      statusEl.textContent = 'Could not read that file.';
+      statusEl.className = 'upload-status err';
+    };
+    reader.readAsDataURL(file);
+    input.value = '';
+  }
+
+  function loadList() {
+    google.script.run.withSuccessHandler(function(data) {
+      cards = data;
+      renderList();
+    }).withFailureHandler(showErr).adminListCards();
+  }
+
+  function themeSwatchFor(key) {
+    var t = THEMES.filter(function(x){ return x.key === key; })[0];
+    return t ? t.swatch : THEMES[0].swatch;
+  }
+
+  function initials(name) {
+    var parts = String(name || '?').trim().split(/\s+/);
+    return ((parts[0]||'')[0] || '') + ((parts.length>1 ? parts[parts.length-1][0] : '') || '');
+  }
+
+  var BASE_URL = '<?= baseUrl ?>';
+
+  function cardUrl(id) {
+    return BASE_URL + '?id=' + encodeURIComponent(id);
+  }
+
+  function copyLink(ev, id) {
+    ev.stopPropagation();
+    var url = cardUrl(id);
+    var done = function() {
+      var toast = document.getElementById('copyToast');
+      toast.classList.add('show');
+      setTimeout(function() { toast.classList.remove('show'); }, 1500);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(done).catch(function() { promptCopy(url); });
+    } else {
+      promptCopy(url);
+    }
+  }
+
+  function promptCopy(url) {
+    window.prompt('Copy this link:', url);
+  }
+
+  function stop(ev) { ev.stopPropagation(); }
+
+  function renderList() {
+    var el = document.getElementById('cardList');
+    var q = (document.getElementById('searchBox').value || '').toLowerCase().trim();
+    var filtered = cards.filter(function(c) {
+      if (!q) return true;
+      return (c.name||'').toLowerCase().indexOf(q) > -1 || (c.id||'').toLowerCase().indexOf(q) > -1;
+    });
+    if (!cards.length) { el.innerHTML = '<p class="muted">No cards yet. Tap "+ New Card" to add one.</p>'; return; }
+    if (!filtered.length) { el.innerHTML = '<p class="muted">No matches for "' + escapeHtml(q) + '".</p>'; return; }
+    el.innerHTML = '';
+    filtered.forEach(function(c) {
+      var active = (c.active === true || c.active === 'TRUE' || c.active === 'true');
+      var swatch = themeSwatchFor(c.theme);
+      var row = document.createElement('div');
+      row.className = 'row' + (active ? '' : ' inactive');
+      row.onclick = function() { openCard(c.id); };
+
+      var thumbHtml = c.profileUrl
+        ? '<img class="thumb" src="' + escapeHtml(c.profileUrl) + '" onerror="this.style.display=\'none\'">'
+        : '<div class="thumb-fallback" style="background:' + swatch + '">' + escapeHtml(initials(c.name)) + '</div>';
+
+      row.innerHTML =
+        thumbHtml +
+        '<div class="info">' +
+          '<div class="name-line"><span class="theme-dot" style="background:' + swatch + '"></span><span class="name">' + escapeHtml(c.name || '(no name)') + '</span></div>' +
+          '<div class="roles">' + escapeHtml(c.roles || '') + '</div>' +
+          '<div class="id">id: ' + escapeHtml(c.id) + '</div>' +
+        '</div>' +
+        '<span class="badge ' + (active ? 'on' : 'off') + '">' + (active ? 'ACTIVE' : 'OFF') + '</span>' +
+        '<div class="row-actions">' +
+          '<button title="Copy link" onclick="copyLink(event, \'' + escapeHtml(c.id) + '\')">🔗</button>' +
+          '<a title="View card" href="' + cardUrl(c.id) + '" target="_blank" onclick="stop(event)">↗</a>' +
+        '</div>' +
+        '<span class="chev">›</span>';
+      el.appendChild(row);
+    });
+  }
+
+  function escapeHtml(s) { return String(s).replace(/[&<>"]/g, function(c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+  function boolOf(v) { return v === true || v === 'TRUE' || v === 'true' || v === 1 || v === '1'; }
+
+  function openCard(id) {
+    var c = cards.filter(function(x){ return x.id === id; })[0];
+    editingOriginalId = id;
+    document.getElementById('f_id').value = c.id || '';
+    document.getElementById('f_id').disabled = true;
+    document.getElementById('idHint').textContent = 'Link: (your web app URL)?id=' + c.id;
+    document.getElementById('f_name').value = c.name || '';
+    document.getElementById('f_roles').value = c.roles || '';
+    document.getElementById('f_theme').value = c.theme || 'classic';
+    updateSwatch();
+    document.getElementById('f_profileUrl').value = c.profileUrl || '';
+    document.getElementById('f_coverUrl').value = c.coverUrl || '';
+    document.getElementById('profileUploadStatus').textContent = '';
+    document.getElementById('coverUploadStatus').textContent = '';
+    syncPreview('profile');
+    syncPreview('cover');
+    document.getElementById('f_active').checked = boolOf(c.active);
+    document.getElementById('f_phone').value = c.phone || '';
+    document.getElementById('f_showPhone').checked = boolOf(c.showPhone);
+    document.getElementById('f_showViber').checked = boolOf(c.showViber);
+    document.getElementById('f_showTelegram').checked = boolOf(c.showTelegram);
+    document.getElementById('f_email').value = c.email || '';
+    document.getElementById('f_showEmail').checked = boolOf(c.showEmail);
+    document.getElementById('f_facebook').value = c.facebook || '';
+    document.getElementById('f_showFacebook').checked = boolOf(c.showFacebook);
+    document.getElementById('f_instagram').value = c.instagram || '';
+    document.getElementById('f_showInstagram').checked = boolOf(c.showInstagram);
+    document.getElementById('deleteBtn').style.display = 'inline-block';
+    document.getElementById('status').textContent = '';
+    updatePreview();
+    showEdit();
+  }
+
+  function newCard() {
+    editingOriginalId = null;
+    ['f_name','f_roles','f_profileUrl','f_coverUrl','f_phone','f_email','f_facebook','f_instagram'].forEach(function(id){
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('f_id').value = '';
+    document.getElementById('f_id').disabled = false;
+    document.getElementById('idHint').textContent = 'Pick a short id, letters/numbers only, e.g. "riesan". Cannot be changed after saving.';
+    document.getElementById('f_theme').value = 'classic';
+    updateSwatch();
+    document.getElementById('profileUploadStatus').textContent = '';
+    document.getElementById('coverUploadStatus').textContent = '';
+    syncPreview('profile');
+    syncPreview('cover');
+    document.getElementById('f_active').checked = true;
+    document.getElementById('f_showPhone').checked = true;
+    document.getElementById('f_showViber').checked = true;
+    document.getElementById('f_showTelegram').checked = true;
+    document.getElementById('f_showEmail').checked = true;
+    document.getElementById('f_showFacebook').checked = true;
+    document.getElementById('f_showInstagram').checked = true;
+    document.getElementById('deleteBtn').style.display = 'none';
+    document.getElementById('status').textContent = '';
+    updatePreview();
+    showEdit();
+  }
+
+  function saveCard() {
+    var card = {
+      id: document.getElementById('f_id').value.trim(),
+      name: document.getElementById('f_name').value.trim(),
+      roles: document.getElementById('f_roles').value.trim(),
+      theme: document.getElementById('f_theme').value,
+      profileUrl: document.getElementById('f_profileUrl').value.trim(),
+      coverUrl: document.getElementById('f_coverUrl').value.trim(),
+      active: document.getElementById('f_active').checked,
+      phone: document.getElementById('f_phone').value.trim(),
+      showPhone: document.getElementById('f_showPhone').checked,
+      showViber: document.getElementById('f_showViber').checked,
+      showTelegram: document.getElementById('f_showTelegram').checked,
+      email: document.getElementById('f_email').value.trim(),
+      showEmail: document.getElementById('f_showEmail').checked,
+      facebook: document.getElementById('f_facebook').value.trim(),
+      showFacebook: document.getElementById('f_showFacebook').checked,
+      instagram: document.getElementById('f_instagram').value.trim(),
+      showInstagram: document.getElementById('f_showInstagram').checked
+    };
+    if (!card.id) { showErr({message:'Card ID is required.'}); return; }
+    document.getElementById('status').textContent = 'Saving…';
+    document.getElementById('status').className = '';
+    google.script.run.withSuccessHandler(function() {
+      document.getElementById('status').textContent = 'Saved ✔';
+      document.getElementById('status').className = 'ok';
+      loadList();
+    }).withFailureHandler(showErr).adminSaveCard(card);
+  }
+
+  function removeCard() {
+    if (!editingOriginalId) return;
+    if (!confirm('Delete this card? This cannot be undone.')) return;
+    google.script.run.withSuccessHandler(function() {
+      showList();
+      loadList();
+    }).withFailureHandler(showErr).adminDeleteCard(editingOriginalId);
+  }
+
+  function showErr(e) {
+    document.getElementById('status').textContent = 'Error: ' + (e && e.message ? e.message : e);
+    document.getElementById('status').className = 'err';
+  }
+
+  function showList() {
+    document.getElementById('listView').style.display = 'block';
+    document.getElementById('editView').style.display = 'none';
+    loadList();
+  }
+  function showEdit() {
+    document.getElementById('listView').style.display = 'none';
+    document.getElementById('editView').style.display = 'block';
+  }
+
+  populateThemeSelect();
+  loadList();
+</script>
+<? } ?>
+</body>
+</html>
